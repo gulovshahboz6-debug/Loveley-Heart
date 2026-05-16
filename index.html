@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Love Heart</title>
+
+<style>
+
+body{
+    margin:0;
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    flex-direction:column;
+    background:radial-gradient(circle,#200010,black);
+    overflow:hidden;
+    font-family:Arial;
+}
+
+/* КНОПКА */
+
+button{
+    padding:16px 42px;
+    font-size:22px;
+    border:none;
+    border-radius:16px;
+    cursor:pointer;
+    background:linear-gradient(45deg,#ff004c,#ff2d75);
+    color:white;
+    font-weight:bold;
+
+    box-shadow:
+    0 0 15px #ff004c,
+    0 0 35px #ff004c;
+
+    transition:0.25s;
+}
+
+button:hover{
+    transform:scale(1.06);
+}
+
+/* СЕРДЦЕ */
+
+.heart{
+    position:relative;
+    width:700px;
+    height:650px;
+    display:none;
+}
+
+/* СЛОВА */
+
+.text{
+    position:absolute;
+    color:#ff1744;
+    font-size:13px;
+    font-weight:bold;
+    opacity:0;
+    white-space:nowrap;
+    z-index:1;
+
+    text-shadow:
+    0 0 5px #ff1744,
+    0 0 10px #ff1744,
+    0 0 25px #ff1744;
+
+    animation:show 0.12s forwards;
+}
+
+/* БУКВА */
+
+.centerS{
+    position:absolute;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+    color:white;
+    font-size:95px;
+    font-family:serif;
+    font-style:italic;
+    z-index:5;
+
+    text-shadow:
+    0 0 10px white,
+    0 0 30px white;
+
+    animation:showS 0.35s forwards;
+}
+
+@keyframes show{
+    to{
+        opacity:1;
+    }
+}
+
+@keyframes showS{
+
+    from{
+        opacity:0;
+        transform:translate(-50%,-50%) scale(0.7);
+    }
+
+    to{
+        opacity:1;
+        transform:translate(-50%,-50%) scale(1);
+    }
+}
+
+</style>
+</head>
+<body>
+
+<button onclick="drawHeart()">Нажми</button>
+
+<div class="heart" id="heart"></div>
+
+<script>
+
+function drawHeart(){
+
+    const heart = document.getElementById("heart");
+
+    heart.style.display = "block";
+    heart.innerHTML = "";
+
+    /* БУКВА S */
+
+    let s = document.createElement("div");
+
+    s.className = "centerS";
+    s.innerText = "S";
+
+    heart.appendChild(s);
+
+    /* СЕРДЦЕ ПОЯВЛЯЕТСЯ БЫСТРО */
+
+    setTimeout(()=>{
+
+        let points = [];
+
+        for(let t = 0; t < Math.PI * 2; t += 0.01){
+
+            for(let r = 0.05; r <= 1; r += 0.03){
+
+                let x = r * (16 * Math.pow(Math.sin(t),3));
+
+                let y = r * (
+                    13 * Math.cos(t)
+                    - 5 * Math.cos(2*t)
+                    - 2 * Math.cos(3*t)
+                    - Math.cos(4*t)
+                );
+
+                /* УБРАЛ ДЫРКУ В ЦЕНТРЕ */
+
+                if(
+                    Math.abs(x) < 1.2 &&
+                    y > -2 &&
+                    y < 4
+                ){
+                    continue;
+                }
+
+                points.push({x,y});
+            }
+        }
+
+        /* ПЕРЕМЕШАТЬ */
+
+        points.sort(() => Math.random() - 0.5);
+
+        points.forEach((p,index)=>{
+
+            let span = document.createElement("span");
+
+            span.className = "text";
+            span.innerText = "I Love You";
+
+            /* НОРМАЛЬНАЯ ФОРМА СЕРДЦА */
+
+            span.style.left = (p.x * 19 + 320) + "px";
+            span.style.top = (-p.y * 19 + 300) + "px";
+
+            /* ОЧЕНЬ БЫСТРОЕ ПОЯВЛЕНИЕ */
+
+            span.style.animationDelay = (index * 0.0012) + "s";
+
+            heart.appendChild(span);
+        });
+
+    },500);
+}
+
+</script>
+
+</body>
+</html>
