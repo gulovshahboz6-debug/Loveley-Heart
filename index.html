@@ -3,10 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Love Heart</title>
+<title>Heart</title>
 
 <style>
-
 body{
     margin:0;
     height:100vh;
@@ -15,183 +14,109 @@ body{
     align-items:center;
     flex-direction:column;
     background:radial-gradient(circle,#200010,black);
-    overflow:hidden;
     font-family:Arial;
+    overflow:hidden;
 }
 
-/* КНОПКА */
-
 button{
-    padding:16px 42px;
-    font-size:22px;
+    padding:16px 40px;
+    font-size:20px;
     border:none;
-    border-radius:16px;
+    border-radius:14px;
     cursor:pointer;
     background:linear-gradient(45deg,#ff004c,#ff2d75);
     color:white;
     font-weight:bold;
-
-    box-shadow:
-    0 0 15px #ff004c,
-    0 0 35px #ff004c;
-
-    transition:0.25s;
+    box-shadow:0 0 20px #ff004c;
 }
 
-button:hover{
-    transform:scale(1.06);
+canvas{
+    margin-top:20px;
 }
-
-/* СЕРДЦЕ */
-
-.heart{
-    position:relative;
-    width:700px;
-    height:650px;
-    display:none;
-}
-
-/* СЛОВА */
-
-.text{
-    position:absolute;
-    color:#ff1744;
-    font-size:13px;
-    font-weight:bold;
-    opacity:0;
-    white-space:nowrap;
-    z-index:1;
-
-    text-shadow:
-    0 0 5px #ff1744,
-    0 0 10px #ff1744,
-    0 0 25px #ff1744;
-
-    animation:show 0.12s forwards;
-}
-
-/* БУКВА */
-
-.centerS{
-    position:absolute;
-    left:50%;
-    top:50%;
-    transform:translate(-50%,-50%);
-    color:white;
-    font-size:95px;
-    font-family:serif;
-    font-style:italic;
-    z-index:5;
-
-    text-shadow:
-    0 0 10px white,
-    0 0 30px white;
-
-    animation:showS 0.35s forwards;
-}
-
-@keyframes show{
-    to{
-        opacity:1;
-    }
-}
-
-@keyframes showS{
-
-    from{
-        opacity:0;
-        transform:translate(-50%,-50%) scale(0.7);
-    }
-
-    to{
-        opacity:1;
-        transform:translate(-50%,-50%) scale(1);
-    }
-}
-
 </style>
 </head>
+
 <body>
 
-<button onclick="drawHeart()">Нажми</button>
-
-<div class="heart" id="heart"></div>
+<button id="btn" onclick="start()">Нажми</button>
+<canvas id="c" width="600" height="600"></canvas>
 
 <script>
 
-function drawHeart(){
+const canvas = document.getElementById("c");
+const ctx = canvas.getContext("2d");
 
-    const heart = document.getElementById("heart");
+let points = [];
+let particles = [];
+let i = 0;
 
-    heart.style.display = "block";
-    heart.innerHTML = "";
+function makeHeart(){
 
-    /* БУКВА S */
+    let arr = [];
 
-    let s = document.createElement("div");
+    for(let t=0; t<Math.PI*2; t+=0.06){
 
-    s.className = "centerS";
-    s.innerText = "S";
+        let x = 16*Math.pow(Math.sin(t),3);
+        let y =
+            13*Math.cos(t)
+            -5*Math.cos(2*t)
+            -2*Math.cos(3*t)
+            -Math.cos(4*t);
 
-    heart.appendChild(s);
+        arr.push({x,y});
+    }
 
-    /* СЕРДЦЕ ПОЯВЛЯЕТСЯ БЫСТРО */
+    arr.sort(() => Math.random() - 0.5); // хаос
 
-    setTimeout(()=>{
+    return arr;
+}
 
-        let points = [];
+function start(){
 
-        for(let t = 0; t < Math.PI * 2; t += 0.01){
+    // 🔥 убрать кнопку
+    document.getElementById("btn").style.display = "none";
 
-            for(let r = 0.05; r <= 1; r += 0.03){
+    points = makeHeart();
+    particles = [];
+    i = 0;
 
-                let x = r * (16 * Math.pow(Math.sin(t),3));
+    animate();
+}
 
-                let y = r * (
-                    13 * Math.cos(t)
-                    - 5 * Math.cos(2*t)
-                    - 2 * Math.cos(3*t)
-                    - Math.cos(4*t)
-                );
+function animate(){
 
-                /* УБРАЛ ДЫРКУ В ЦЕНТРЕ */
+    ctx.clearRect(0,0,600,600);
 
-                if(
-                    Math.abs(x) < 1.2 &&
-                    y > -2 &&
-                    y < 4
-                ){
-                    continue;
-                }
+    for(let p of particles){
 
-                points.push({x,y});
-            }
-        }
+        ctx.fillStyle = "#ff1744";
+        ctx.shadowColor = "#ff1744";
+        ctx.shadowBlur = 10;
 
-        /* ПЕРЕМЕШАТЬ */
+        ctx.font = "14px Arial";
+        ctx.fillText("I ♥️ You", p.x, p.y);
+    }
 
-        points.sort(() => Math.random() - 0.5);
+    if(i < points.length){
 
-        points.forEach((p,index)=>{
+        let p = points[i];
 
-            let span = document.createElement("span");
-
-            span.className = "text";
-            span.innerText = "I Love You";
-
-            /* НОРМАЛЬНАЯ ФОРМА СЕРДЦА */
-
-            span.style.left = (p.x * 19 + 320) + "px";
-            span.style.top = (-p.y * 19 + 300) + "px";
-
-            /* ОЧЕНЬ БЫСТРОЕ ПОЯВЛЕНИЕ */
-
-            span.style.animationDelay = (index * 0.0012) + "s";
-
-            heart.appendChild(span);
+        particles.push({
+            x: 300 + p.x * 18,
+            y: 300 - p.y * 18
         });
 
-    },500);
+        i++;
+    }
+
+    // 💖 S по центру
+    ctx.fillStyle = "white";
+    ctx.shadowColor = "white";
+    ctx.shadowBlur = 15;
+    ctx.font = "80px serif";
+    ctx.fillText("S", 285, 320);
+
+    requestAnimationFrame(animate);
 }
 
 </script>
